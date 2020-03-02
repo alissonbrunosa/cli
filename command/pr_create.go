@@ -30,6 +30,14 @@ func computeDefaults(baseRepo ghrepo.Interface, baseBranch string, headBranchLab
 	// investigate how to get the ref for the base branch and where we're already doing a query that
 	// could include it (i'm hoping it's the Repository struct query but I'm not sure)
 
+	// If there is only one commit:
+	// - title: commit message
+	// - body: commit body
+
+	// If there are multiple:
+	// - title: headBranch "humanized"
+	// - body: list of commit messages
+
 	return defaults{}, nil
 }
 
