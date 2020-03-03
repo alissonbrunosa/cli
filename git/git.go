@@ -71,6 +71,16 @@ func UncommittedChangeCount() (int, error) {
 	return count, nil
 }
 
+type Commit struct {
+	Sha     string
+	Title   string
+	Message string
+}
+
+func Commits(baseRef, headRef string) ([]*Commit, error) {
+
+}
+
 // Push publishes a git ref to a remote and sets up upstream configuration
 func Push(remote string, ref string) error {
 	pushCmd := GitCommand("push", "--set-upstream", remote, ref)
