@@ -164,7 +164,6 @@ func prCreate(cmd *cobra.Command, _ []string) error {
 	interactive := title == "" || body == ""
 
 	if title == "" || body == "" {
-		// TODO figure out the significance of headBranchLabel and determine if this is ok:
 		defaults, err := computeDefaults(baseBranch, headBranch)
 		if err != nil {
 			return fmt.Errorf("could not compute title or body defaults:  %w", err)

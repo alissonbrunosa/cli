@@ -2,8 +2,10 @@ package git
 
 import (
 	"bytes"
+	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"os/exec"
@@ -71,30 +73,40 @@ func UncommittedChangeCount() (int, error) {
 	return count, nil
 }
 
-// TODO one day support body
 type Commit struct {
 	Sha   string
 	Title string
+	Body  string
 }
 
 func Commits(baseRef, headRef string) ([]*Commit, error) {
 	logCmd := GitCommand(
-		"log", `--pretty=format:'%h,%s'`,
+		"log", "--pretty=format:%h,%s,\"%b\"",
 		fmt.Sprintf("%s..%s", baseRef, headRef))
 	output, err := utils.PrepareCmd(logCmd).Output()
 	if err != nil {
 		return []*Commit{}, err
 	}
+	r := csv.NewReader(bytes.NewReader(output))
 
-	lines := strings.Split(string(output), "\n")
 	commits := []*Commit{}
-	for _, line := range lines {
-		split := strings.SplitN(line, ",", 2)
+	sha := 0
+	title := 1
+	body := 2
+	for {
+		record, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			os.Stderr.WriteString(fmt.Sprintf("skipping unparseable commit. error: %w\n", err.Error()))
+			continue
+		}
 		commits = append(commits, &Commit{
-			Sha:   split[0],
-			Title: split[1],
+			Sha:   record[sha],
+			Title: record[title],
+			Body:  record[body],
 		})
-
 	}
 
 	return commits, nil
