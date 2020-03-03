@@ -99,7 +99,8 @@ func Commits(baseRef, headRef string) ([]*Commit, error) {
 			break
 		}
 		if err != nil {
-			os.Stderr.WriteString(fmt.Sprintf("skipping unparseable commit. error: %w\n", err.Error()))
+			os.Stderr.WriteString(
+				fmt.Sprintf("skipping unparseable commit. error: %v\n", err.Error()))
 			continue
 		}
 		commits = append(commits, &Commit{
