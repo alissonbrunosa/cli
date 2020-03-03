@@ -19,7 +19,7 @@ type defaults struct {
 	Body  string
 }
 
-func computeDefaults(baseRepo ghrepo.Interface, baseBranch string, headBranchLabel string) (defaults, error) {
+func computeDefaults(baseRef, headRef string) (defaults, error) {
 	/*
 		• we fetch information about the base repo, such as the base branch name. you could request an additional field that's the commit SHA of the base branch, which you can then use locally to generate a git log between <base>..HEAD
 		• if there is only 1 commit, we can pre-populate
@@ -37,6 +37,17 @@ func computeDefaults(baseRepo ghrepo.Interface, baseBranch string, headBranchLab
 	// If there are multiple:
 	// - title: headBranch "humanized"
 	// - body: list of commit messages
+
+	commits, err := git.Commits(baseRef, headRef)
+	if err != nil {
+		return defaults{}, err
+	}
+
+	for _, c := range commits {
+		fmt.Println(c.Sha, c.Title)
+	}
+
+	// TODO
 
 	return defaults{}, nil
 }
@@ -153,7 +164,8 @@ func prCreate(cmd *cobra.Command, _ []string) error {
 	interactive := title == "" || body == ""
 
 	if title == "" || body == "" {
-		defaults, err := computeDefaults(baseRepo, baseBranch, headBranchLabel)
+		// TODO figure out the significance of headBranchLabel and determine if this is ok:
+		defaults, err := computeDefaults(baseBranch, headBranch)
 		if err != nil {
 			return fmt.Errorf("could not compute title or body defaults:  %w", err)
 		}

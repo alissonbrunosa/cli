@@ -71,14 +71,33 @@ func UncommittedChangeCount() (int, error) {
 	return count, nil
 }
 
+// TODO one day support body
 type Commit struct {
-	Sha     string
-	Title   string
-	Message string
+	Sha   string
+	Title string
 }
 
 func Commits(baseRef, headRef string) ([]*Commit, error) {
+	logCmd := GitCommand(
+		"log", `--pretty=format:'%h,%s'`,
+		fmt.Sprintf("%s..%s", baseRef, headRef))
+	output, err := utils.PrepareCmd(logCmd).Output()
+	if err != nil {
+		return []*Commit{}, err
+	}
 
+	lines := strings.Split(string(output), "\n")
+	commits := []*Commit{}
+	for _, line := range lines {
+		split := strings.SplitN(line, ",", 2)
+		commits = append(commits, &Commit{
+			Sha:   split[0],
+			Title: split[1],
+		})
+
+	}
+
+	return commits, nil
 }
 
 // Push publishes a git ref to a remote and sets up upstream configuration
